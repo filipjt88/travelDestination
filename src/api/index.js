@@ -1,11 +1,15 @@
 import axios from "axios";
 
-const API = axios.create({
-  baseURL: "http://localhost:4000",
-});
+// API za sve destinacije (države)
+export const getDestinations = () => {
+  return axios.get(
+    "https://restcountries.com/v3.1/all?fields=name,capital,flags,region,population"
+  );
+};
 
-export const searchCities = (q) =>
-  API.get(`/api/cities?q=${q}`);
-
-export const getPhotos = (q) =>
-  API.get(`/api/photos?q=${q}`);
+// API pretraga destinacija po nazivu
+export const searchDestinations = (query) => {
+  return axios.get(
+    `https://restcountries.com/v3.1/name/${query}?fields=name,capital,flags,region,population`
+  );
+};

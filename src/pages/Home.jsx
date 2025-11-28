@@ -1,8 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Container, Row, Col } from "react-bootstrap";
 import SearchBar from "../components/SearchBar"; 
 import DestinationCard from "../components/DestionationCard";
-import { SearchCities, getPhotos, searchCities } from "../api";
+import { getDestinations, searchDestinations } from "../api/index";
+
+
+
 
 export default function Home() {
     const [destinations, setDestinations] = useState([]);
