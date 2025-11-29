@@ -4,42 +4,48 @@ import SearchBar from "../components/SearchBar";
 import DestinationCard from "../components/DestionationCard";
 import { getDestinations, searchDestinations } from "../api/index";
 
-
-
-
 export default function Home() {
-    const [destinations, setDestinations] = useState([]);
+  const [destinations, setDestinations] = useState([]);
 
-    const handleSearch = async (q) => {
-        const cityRes = await searchCities(q);
+  // Učitaj sve države pri pokretanju
+  useEffect(() => {
+    loadAll();
+  }, []);
 
-        const cities = cityRes.data._embedded["city:search-results"].slice(0,6);
+  const loadAll = async () => {
+    const res = await getDestinations();
+    setDestinations(res.data);
+  };
 
-        const enriched = await Promise.all(
-            cities.map(async (c) => {
-                const cityName = c.matching_full_name.split(",")[0];
-                const photoRes = await getPhotos(cityName);
-                return {
-                    city: cityName,
-                    image: photoRes.data[0]?.urls.small
-                };
-            })
-        );
-        setDestinations(enriched);
-    };
+  // Pretraga
+  const handleSearch = async (q) => {
+    if (!q) return loadAll();
 
-    return(
-        <Container>
+    try {
+      const res = await searchDestinations(q);
+      setDestinations(res.data);
+    } catch (err) {
+      console.log("Nothing found.");
+      setDestinations([]);
+    }
+  };
+
+  return (
+    <Container>
       <h1 className="mt-4 text-center">Travel Destination Explorer</h1>
       <SearchBar onSearch={handleSearch} />
 
-      <Row>
+      <Row className="mt-4">
         {destinations.map((d, i) => (
-          <Col md={4} key={i}>
-            <DestinationCard city={d.city} image={d.image} />
+          <Col md={4} key={i} className="mb-4">
+            <DestinationCard
+              city={d.name.common}
+              image={d.flags.png}
+              country={d.capital?.[0] || "N/A"}
+            />
           </Col>
         ))}
       </Row>
     </Container>
-    )
+  );
 }
