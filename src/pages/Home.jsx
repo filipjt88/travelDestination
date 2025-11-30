@@ -37,7 +37,7 @@ export default function Home() {
 
       <Row className="mt-4">
         {destinations.map((d, i) => (
-          <Col md={4} key={i} className="mb-4">
+          <Col md={2} key={i} className="mb-4">
             <DestinationCard
               city={d.name.common}
               image={d.flags.png}
