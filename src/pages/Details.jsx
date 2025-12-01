@@ -1,4 +1,3 @@
-// Details.jsx
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
@@ -35,7 +34,7 @@ export default function Details() {
     setLoading(true);
     setError(null);
 
-    // REST Countries API v3.1 - pretražuje po imenu
+    // REST Countries API v3.1 - pretraživanje po imenu
     const controller = new AbortController();
     const signal = controller.signal;
 
