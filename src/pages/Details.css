@@ -1,9 +1,9 @@
-/* Details.css */
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap');
 .details-container {
   padding: 16px;
   max-width: 1100px;
   margin: 0 auto;
-  font-family: Inter, Roboto, Arial, sans-serif;
+  font-family: "JetBrains Mono", monospace;
 }
 
 .details-header {

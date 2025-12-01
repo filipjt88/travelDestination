@@ -3,6 +3,7 @@ import { Container, Row, Col } from "react-bootstrap";
 import SearchBar from "../components/SearchBar"; 
 import DestinationCard from "../components/DestionationCard";
 import { getDestinations, searchDestinations } from "../api/index";
+import "../pages/Details.css";
 
 export default function Home() {
   const [destinations, setDestinations] = useState([]);
