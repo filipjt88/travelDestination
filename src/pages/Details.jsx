@@ -6,7 +6,7 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "./Details.css";
 
-// Workaround za Leaflet default marker icons u mnogim bundlerima
+
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl:
@@ -18,7 +18,7 @@ L.Icon.Default.mergeOptions({
 });
 
 export default function Details() {
-  const { name } = useParams(); // ruter treba da prosledi :name (npr. /details/France)
+  const { name } = useParams();
   const navigate = useNavigate();
 
   const [country, setCountry] = useState(null);
@@ -27,7 +27,7 @@ export default function Details() {
 
   useEffect(() => {
     if (!name) {
-      setError("Nije prosleđeno ime države u ruti.");
+      setError("No route country name passed.");
       setLoading(false);
       return;
     }
@@ -36,38 +36,35 @@ export default function Details() {
     setError(null);
 
     // REST Countries API v3.1 - pretražuje po imenu
-    // Ako želiš po šifri (cca2/cca3) koristi /alpha/{code}
     const controller = new AbortController();
     const signal = controller.signal;
 
     fetch(`https://restcountries.com/v3.1/name/${encodeURIComponent(name)}?fullText=true`, { signal })
       .then(async (res) => {
         if (!res.ok) {
-          // pokušaj i partial match ako fullText=false ne radi
           if (res.status === 404) {
-            // pokušaj bez fullText
             const r2 = await fetch(
               `https://restcountries.com/v3.1/name/${encodeURIComponent(name)}`,
               { signal }
             );
-            if (!r2.ok) throw new Error(`Država "${name}" nije pronađena.`);
+            if (!r2.ok) throw new Error(`Country "${name}" not found!`);
             return r2.json();
           }
-          throw new Error(`Greška pri učitavanju: ${res.status}`);
+          throw new Error(`Loading error: ${res.status}`);
         }
         return res.json();
       })
       .then((data) => {
         // API vraća niz podataka; uzmemo prvi rezultat
         if (!Array.isArray(data) || data.length === 0) {
-          throw new Error("Nema podataka za traženu državu.");
+          throw new Error("There is no data for the requested country.");
         }
         setCountry(data[0]);
         setLoading(false);
       })
       .catch((err) => {
         if (err.name === "AbortError") return;
-        setError(err.message || "Došlo je do greške.");
+        setError(err.message || "An error occurred.");
         setLoading(false);
       });
 
@@ -77,8 +74,8 @@ export default function Details() {
   if (loading) {
     return (
       <div className="details-container">
-        <button onClick={() => navigate(-1)} className="back-button">Nazad</button>
-        <p>Učitavanje...</p>
+        <button onClick={() => navigate(-1)} className="back-button">Back</button>
+        <p>Loading...</p>
       </div>
     );
   }
@@ -86,8 +83,8 @@ export default function Details() {
   if (error) {
     return (
       <div className="details-container">
-        <button onClick={() => navigate(-1)} className="back-button">Nazad</button>
-        <p className="error">Greška: {error}</p>
+        <button onClick={() => navigate(-1)} className="back-button">Back</button>
+        <p className="error">Error: {error}</p>
       </div>
     );
   }
@@ -100,27 +97,27 @@ export default function Details() {
 
   // fallback centar (ako nema koordinata) - prikaži celokupnu mapu sveta
   const mapCenter = latlng ?? [20, 0];
-  const mapZoom = latlng ? 5 : 2;
+  const mapZoom   = latlng ? 5 : 2;
 
   // korisne vrednosti iz odgovora
-  const commonName = country?.name?.common ?? name;
+  const commonName   = country?.name?.common ?? name;
   const officialName = country?.name?.official ?? "";
-  const capital = Array.isArray(country?.capital) ? country.capital.join(", ") : country?.capital ?? "N/A";
-  const region = country?.region ?? "N/A";
-  const subregion = country?.subregion ?? "N/A";
-  const population = country?.population ? country.population.toLocaleString() : "N/A";
-  const currencies = country?.currencies
+  const capital      = Array.isArray(country?.capital) ? country.capital.join(", ") : country?.capital ?? "N/A";
+  const region       = country?.region ?? "N/A";
+  const subregion    = country?.subregion ?? "N/A";
+  const population   = country?.population ? country.population.toLocaleString() : "N/A";
+  const currencies   = country?.currencies
     ? Object.values(country.currencies)
         .map((c) => `${c.name} (${c.symbol ?? ""})`.trim())
         .join(", ")
     : "N/A";
-  const languages = country?.languages ? Object.values(country.languages).join(", ") : "N/A";
+  const languages    = country?.languages ? Object.values(country.languages).join(", ") : "N/A";
   const flag = country?.flags?.png ?? country?.flags?.svg ?? null;
 
   return (
     <div className="details-container">
       <div className="details-header">
-        <button onClick={() => navigate(-1)} className="back-button">← Nazad</button>
+        <button onClick={() => navigate(-1)} className="back-button">← Back</button>
         <h1>{commonName}</h1>
         {officialName && <small className="official">({officialName})</small>}
       </div>
@@ -132,12 +129,12 @@ export default function Details() {
           )}
 
           <ul className="info-list">
-            <li><strong>Glavni grad:</strong> {capital}</li>
-            <li><strong>Region / Podregion:</strong> {region} / {subregion}</li>
-            <li><strong>Stanovništvo:</strong> {population}</li>
-            <li><strong>Valute:</strong> {currencies}</li>
-            <li><strong>Jezici:</strong> {languages}</li>
-            <li><strong>Territorijalne koordinate:</strong> {latlng ? `${latlng[0]}, ${latlng[1]}` : "Nema podataka"}</li>
+            <li><strong>Capital city:</strong> {capital}</li>
+            <li><strong>Region / Subregion:</strong> {region} / {subregion}</li>
+            <li><strong>Population:</strong> {population}</li>
+            <li><strong>Currencies:</strong> {currencies}</li>
+            <li><strong>Languages:</strong> {languages}</li>
+            <li><strong>Territorial coordinates:</strong> {latlng ? `${latlng[0]}, ${latlng[1]}` : "No data"}</li>
           </ul>
         </div>
 
@@ -164,7 +161,7 @@ export default function Details() {
                 <Popup>
                   <div style={{ minWidth: 150 }}>
                     <strong>{commonName}</strong>
-                    <div>{capital !== "N/A" ? `Glavni grad: ${capital}` : null}</div>
+                    <div>{capital !== "N/A" ? `Capital city: ${capital}` : null}</div>
                   </div>
                 </Popup>
               </Marker>
